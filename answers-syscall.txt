@@ -1,0 +1,7 @@
+syscall was called by kernel/trap.c in line 67
+p->trapframe->a7 represents the syscall number (in the enum)
+the previous mode was 0x200000022
+the assembly instruction is: lw	s3,0(zero) # 0 <_entry-0x80000000>
+num corresponds to register s3
+address 0 is not in the kernel address space and because of that when it tries to load from there it panics
+the binary that ran was initcode and the pid was 0

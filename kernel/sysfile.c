@@ -1,5 +1,5 @@
 //
-// File-system system calls.
+// File-system system calls.MAX_ARRAY_SIZE
 // Mostly argument checking, since we don't trust
 // user code, and calls into file.c and fs.c.
 //
@@ -15,6 +15,7 @@
 #include "sleeplock.h"
 #include "file.h"
 #include "fcntl.h"
+#include "sysinfo.h"
 
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
@@ -501,5 +502,20 @@ sys_pipe(void)
     fileclose(wf);
     return -1;
   }
+  return 0;
+}
+
+extern uint64 num_of_proc();
+extern uint64 free_mem();
+
+uint64 sysinfo(void){
+  uint64 info_adress;
+  struct sysinfo my_info;
+  my_info.freemem = free_mem();
+  my_info.nproc = num_of_proc();
+  argaddr(0, &info_adress);
+  struct proc* p = myproc();
+  if (copyout(p->pagetable, info_adress, (char*)&my_info, sizeof(my_info)) < 0)
+    return -1;
   return 0;
 }
