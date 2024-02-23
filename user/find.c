@@ -19,7 +19,6 @@ char* fmtname(char* path)
         return p;
     memmove(buf, p, strlen(p));
     memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
-    //printf("fmtname: %s in path: %s. the buff is: %s\n", p, path, buf);
     return p;
     return buf;
 }
@@ -44,13 +43,11 @@ void find(char *path, char* to_find)
     switch(st.type){
     case T_DEVICE:
     case T_FILE:
-        //printf("path: %s, fmtpath: %s", path, fmtname(path));
         if (strcmp(fmtname(path), to_find) == 0)
             printf("%s\n", path);
         break;
 
     case T_DIR:
-        //printf("im here");
         if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){
             printf("find: path too long\n");
             break;
@@ -62,18 +59,14 @@ void find(char *path, char* to_find)
             if(de.inum == 0)
                 continue;
             memmove(p, de.name, DIRSIZ);
-            //printf("de is: %d %s", &de.inum, de.name);
             p[DIRSIZ] = 0;
-            // printf("buf is %s", buf);
             if(stat(buf, &st) < 0){
                 printf("find: cannot stat %s\n", buf);
                 continue;
             }
             if ((strcmp(fmtname(buf),".")) == 0 || strcmp(fmtname(buf),"..") == 0){
-                //printf("thrown out %s, formatted is %s\n", buf, fmtname(buf));
                 continue;
             }
-            // printf("find(%s,%s)\n",buf,to_find); 
             find(buf, to_find );
         }
         break;
@@ -85,15 +78,15 @@ int main(int argc, char *argv[])
 {
     int i;
 
-    if(argc < 2){
+    if (argc < 2) {
         exit(0);
     }
-    if (argc == 2)
-    {
+
+    if (argc == 2) {
         find(".", argv[1]);
         exit(0);
     }
-    for(i=2; i<argc; i++)
+    for (i=2; i<argc; i++)
         find(argv[1], argv[i]);
     exit(0);
 }

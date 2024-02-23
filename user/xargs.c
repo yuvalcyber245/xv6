@@ -5,7 +5,7 @@
 #include "kernel/fcntl.h"
 #include "kernel/param.h"
 
-#define MAX_BUFFER_SIZE 32
+#define MAX_BUFFER_SIZE 256
 
 int main(int argc, char* argv[])
 {
@@ -29,12 +29,13 @@ int main(int argc, char* argv[])
             exit(0);
         }
         if (*letter_holder == ' '){
-            // start a new word
+            // allocate memory for the current word, put it in the array and start a new word
             temp_buff[index_in_word] = '\0';
             words[word_index] = malloc(sizeof(char) * (index_in_word + 1));
             strcpy(words[word_index], temp_buff);
             word_index++;
             index_in_word = 0;
+            //temp_buff[0] = '\0';
             for (int i = 0; i < MAX_BUFFER_SIZE; i++)
             {
                 temp_buff[i] = '\0';
@@ -45,12 +46,14 @@ int main(int argc, char* argv[])
             temp_buff[index_in_word] = '\0';
             words[word_index] = malloc(sizeof(char) * (index_in_word + 1));
             strcpy(words[word_index], temp_buff);
-            //exec and start again with new line
+            // exec and start again with new line
             if (fork() == 0){
+                // child process executes
                 exec(argv[1], words);
                 exit(0);
             }
             else{
+                // parent process frees words, returns variables to initial state and continues
                 wait((int*) 0);
                 for(int i = argc - 1; i < word_index; i++)
                 {
@@ -61,6 +64,7 @@ int main(int argc, char* argv[])
                 continue;
             }
         }
+        // if the letter was not \n or \0 or ' ' it was part of the current word
         temp_buff[index_in_word] = *letter_holder;
         index_in_word++;
     }
