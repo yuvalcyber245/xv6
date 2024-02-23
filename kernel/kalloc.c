@@ -88,10 +88,6 @@ uint64 free_mem(void)
   acquire(&kmem.lock);
   r = kmem.freelist;
   while(r){
-    if (count % 1000 == 0)
-    {
-      printf("%d\n", count);
-    }
     count++;
     r = r->next;
   }

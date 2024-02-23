@@ -693,6 +693,7 @@ procdump(void)
 uint64 num_of_proc(void){
   struct proc *p;
   uint64 count = 0;
+  // go through all processes and count the number that are not unused
   for(p = proc; p < &proc[NPROC]; p++) {
     acquire(&p->lock);
     if(p->state != UNUSED)
