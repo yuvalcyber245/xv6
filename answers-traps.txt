@@ -1,0 +1,10 @@
+the arguments are saved in registers a0, a1, a2 and so on. argument 3 was saved in a2
+the line is
+26:	45b1                	li	a1,12
+the compiler is smart enough to do f(8) + 1 = g(8) + 1 = 8 + 3 + 1 = 12 in advance
+printf is in adress 1552, (0x640 in hex)
+the value in ra is the return adress to main (0x34)
+the output is HE110 World
+to make it work in big endian i would flip the bytes in i (so i = 0x726c6400)
+and i would change i to 186 which is 0x011E in hex
+the value is whatever is in register a2 because printf expects another arguments aand uses the place tha the answer should apear in

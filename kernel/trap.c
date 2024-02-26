@@ -37,7 +37,7 @@ void
 usertrap(void)
 {
   int which_dev = 0;
-
+  
   if((r_sstatus() & SSTATUS_SPP) != 0)
     panic("usertrap: not from user mode");
 
@@ -75,6 +75,20 @@ usertrap(void)
 
   if(killed(p))
     exit(-1);
+
+  struct trapframe saved_trapframe;
+  // add to tick amount if timer interrupt, and send to trap handler when necassary.
+  if (which_dev == 2) {
+    if (p->alarm_interval != 0 && p->tick_amount == p->alarm_interval)
+    {
+      memmove(&saved_trapframe, p->trapframe, sizeof(struct trapframe));
+      p->saved_trapframe = &saved_trapframe;
+      p->tick_amount = -1; // stays -1 until sys_sigreturn.
+      p->trapframe->epc = p->function_handler;
+    }
+    if (p->tick_amount >= 0 && p->alarm_interval != 0)
+      p->tick_amount += 1;
+  }
 
   // give up the CPU if this is a timer interrupt.
   if(which_dev == 2)
@@ -216,6 +230,22 @@ devintr()
     return 2;
   } else {
     return 0;
+  }
+}
+
+static inline uint64 r_fp() {
+  uint64 x;
+  asm volatile("mv %0, s0" : "=r" (x) );
+  return x;
+}
+
+void backtrace()
+{
+  uint64 last_fp = r_fp();
+  uint64 page_of_stack = PGROUNDDOWN(last_fp);
+  while (PGROUNDDOWN(last_fp) == page_of_stack) { 
+    printf("%p\n", *((uint64* )last_fp - 1));
+    last_fp = *((uint64* )last_fp - 2);
   }
 }
 
