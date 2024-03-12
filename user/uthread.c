@@ -8,10 +8,12 @@
 #define RUNNABLE    0x2
 
 #define STACK_SIZE  8192
+#define REGISTER_HOLDER_SIZE 120
 #define MAX_THREAD  4
 
 
 struct thread {
+  uint64     register_holder[REGISTER_HOLDER_SIZE / 8];
   char       stack[STACK_SIZE]; /* the thread's stack */
   int        state;             /* FREE, RUNNING, RUNNABLE */
 };
@@ -56,10 +58,8 @@ thread_schedule(void)
     next_thread->state = RUNNING;
     t = current_thread;
     current_thread = next_thread;
-    /* YOUR CODE HERE
-     * Invoke thread_switch to switch from t to next_thread:
-     * thread_switch(??, ??);
-     */
+    
+    thread_switch((uint64)t->register_holder, (uint64)next_thread->register_holder);
   } else
     next_thread = 0;
 }
@@ -73,7 +73,8 @@ thread_create(void (*func)())
     if (t->state == FREE) break;
   }
   t->state = RUNNABLE;
-  // YOUR CODE HERE
+  t->register_holder[12] = (uint64)func;
+  t->register_holder[13] = (uint64)(t->stack + STACK_SIZE);
 }
 
 void 
